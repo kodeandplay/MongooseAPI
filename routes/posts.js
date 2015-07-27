@@ -10,25 +10,41 @@ var router = express.Router({
 
 router.param('id', function(req, res, next, id) {
 
-	PostModel.findOne({ _id: id }, function(err, post) {
+	// PostModel.findOne({ _id: id }, function(err, post) {
+	PostModel.findById( id )	// Better! No query involved. findById vs findOne
+			 .populate('author')
+			 .exec(function(err, post) { 
+				if(err) {
+					console.log('Error:', err);
+					return next(err);
+				} 
+
+				if(post) {
+					req.post = post;
+					return next();
+				}
+
+				// Post not found for the submitted id
+				next(new Error('Post not found'));
+			});
+});
+
+router.delete('/:id', function(req, res, next) {
+	var post = req.post;
+	post.remove(function(err, result) {
 		if(err) {
 			console.log('Error:', err);
 			return next(err);
-		} 
-
-		if(post) {
-			req.post = post;
-			return next();
 		}
 
-		// Post not found for the submitted id
-		next(new Error('Post not found'));
+		res.send(result);
 	});
 });
 
 router.get('/', function(req, res, next) {
 
-	PostModel.find({}, function(err, posts) {
+	// 
+	PostModel.find({}, {}, { limit: 3, sort: { createdAt: -1 } }, function(err, posts) {
 	
 		if(err) return next(err);
 		
@@ -50,7 +66,9 @@ router.put('/:id', function(req, res, next) {
 			return next(err);
 		}
 
-		res.send(result.toJSON());
+		// By default toJSON does not call custom get method, therefore we must
+		// pass in the special option
+		res.send(result.toJSON({getters: true, virtuals: true})); // toJSON just to be safe
 	});
 
 });
@@ -58,7 +76,10 @@ router.put('/:id', function(req, res, next) {
 router.get('/:id', function(req ,res, next) {
 	
 	var post = req.post;
-	res.send(post.toJSON()); // just to be safe
+	// By default toJSON does not call custom get method, therefore we must
+	// pass in the special option
+	// Note: Possible bug, when getters is true, virtuals is set to true as well
+	res.send(post.toJSON({getters: true, virtuals: true})); // just to be safe
 
 });
 

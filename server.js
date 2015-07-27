@@ -6,6 +6,7 @@ var logger 			= require('morgan'),
 	bodyParser 		= require('body-parser'),
 	errorhandler	= require('errorhandler'),
 	postsRoute 		= require('./routes/posts'),
+	usersRouter 	= require('./routes/users'),
 	app 			= express();
 
 if(cluster.isMaster) {
@@ -33,7 +34,7 @@ if(cluster.isMaster) {
 } else {
 
 	/***** Database setup using Mongo and Mongoose *****/
-	var dbURI = 'mongodb://localhost:27017/api'
+	var dbURI = process.env.MONGOHQ_URL || 'mongodb://localhost:27017/api'
 	mongoose.connect(dbURI);
 
 	var db = mongoose.connection;
@@ -60,6 +61,7 @@ if(cluster.isMaster) {
 	});
 
 	app.use('/posts', postsRoute);
+	app.use('/users', usersRouter);
 
 	if( process.env.NODE_ENV == 'development' || typeof process.env.NODE_ENV == 'undefined') {
 		app.use(errorhandler());

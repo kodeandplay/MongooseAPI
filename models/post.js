@@ -7,13 +7,24 @@ var Schema = mongoose.Schema({
 		type: String, 
 		required: true, 
 		trim: true,
-		match: /^([\w ,.!?]{1,100})$/
+		match: /^([\w ,.!?]{1,100})$/,
+		set: function(value) {
+			return value.toUpperCase();
+		},
+		get: function(value) {
+			return value.toLowerCase();
+		}
+	},
+
+	author: {
+		type: mongoose.Schema.Types.ObjectId,
+		ref: 'User'
 	},
 
 	text: {	
 		type: String, 
 		required: true,
-		max: 2000 
+		max: 2000
 	},
 
 	followers: [mongoose.Schema.Types.ObjectId],
@@ -42,9 +53,13 @@ var Schema = mongoose.Schema({
 
 	viewCounter: {
 		type: Number, 
-		default: 0 
+		default: 0,
+		validate: function(value) {
+			return value < 0 ? false : true; // could have made even shorter but this is readable
+		}
 	},
 
+	// published: Boolean
 	published: {
 		type: Boolean,
 		default: false
@@ -61,6 +76,77 @@ var Schema = mongoose.Schema({
 	}
 });
 
+// Instead of creating 'set', 'get', 'validate' methods within
+// the schema we can create each of them outside like below.
+// This would require removing the validate property from viewCounter of course.
+// Must preceed the initiation of the Model
+//Schema.path('viewCounter').validate( function(value) {
+//	return value >= 0;
+//});
+
+// Virtual Field
+Schema.virtual('hasComments').get(function() {
+	// this refers to Model
+	return this.comments.length > 0
+});
+
+// Pre (save) Hook
+Schema.pre('save', function(next) {
+
+	this.updatedAt = new Date();
+	next();
+});
+
+// Pre (validate) Hook
+Schema.pre('validate', function(next) {
+	var error = null,
+		comments = this.comments,
+		length = comments.length;
+
+	if(this.isModified('comments') && length > 0) {
+
+		for(var i = 0; i < length; i++) {
+			if(!comments[i].text || !comments[i].author.id) {
+				error = new Error('Text and author must be present.');
+				return next(error)
+			}
+		}
+	}
+
+	// The text and author.id properties of the comment objects are 
+	// all present, proceed.
+	next();
+});
+
+// Post (save) hook
+// Note: Mongo document associated with model is returned with post hooks
+Schema.post('save', function(doc) {
+	console.log('Object was saved.');
+});
+
+// Create Model
 var Post = mongoose.model('Post', Schema, 'posts');
 
 module.exports = Post;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
