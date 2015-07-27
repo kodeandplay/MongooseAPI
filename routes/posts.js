@@ -12,7 +12,7 @@ router.param('id', function(req, res, next, id) {
 
 	// PostModel.findOne({ _id: id }, function(err, post) {
 	PostModel.findById( id )	// Better! No query involved. findById vs findOne
-			 .populate('author')
+			 .populate('author') // Amazing MongoDB feature
 			 .exec(function(err, post) { 
 				if(err) {
 					console.log('Error:', err);
@@ -43,7 +43,10 @@ router.delete('/:id', function(req, res, next) {
 
 router.get('/', function(req, res, next) {
 
-	// 
+	// Testing 'class' static method. Not called an any 
+	// particular model/document
+	PostModel.staticMethod(function() { });
+
 	PostModel.find({}, {}, { limit: 3, sort: { createdAt: -1 } }, function(err, posts) {
 	
 		if(err) return next(err);
@@ -76,6 +79,10 @@ router.put('/:id', function(req, res, next) {
 router.get('/:id', function(req ,res, next) {
 	
 	var post = req.post;
+
+	// Testing instance methods provided my Mongoose
+	post.someMethod(function() {});
+
 	// By default toJSON does not call custom get method, therefore we must
 	// pass in the special option
 	// Note: Possible bug, when getters is true, virtuals is set to true as well

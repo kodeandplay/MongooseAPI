@@ -16,6 +16,8 @@ var Schema = mongoose.Schema({
 		}
 	},
 
+	photo: Buffer, // NodeJS data type
+
 	author: {
 		type: mongoose.Schema.Types.ObjectId,
 		ref: 'User'
@@ -83,6 +85,17 @@ var Schema = mongoose.Schema({
 //Schema.path('viewCounter').validate( function(value) {
 //	return value >= 0;
 //});
+
+Schema.statics.staticMethod = function(callback) {
+	console.log('static method called');
+	return callback();
+}
+
+Schema.methods.someMethod = function(callback) {
+	console.log('some method called on this model/document');
+	return callback();
+}
+
 
 // Virtual Field
 Schema.virtual('hasComments').get(function() {
