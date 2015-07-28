@@ -1,5 +1,5 @@
 var express = require('express'),
-	UserModel = require('../models/user');
+    UserModel = require('../models/user');
 
 var router = express.Router({
 		
