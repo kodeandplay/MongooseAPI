@@ -2,12 +2,20 @@ var express 	= require('express'),
 	PostModel 	= require('../models/post');
 
 var router = express.Router({
-		caseSensitive: 	false,	// '/Foo' and '/foo' aret treated the same
-		mergeParams: 	false,	// Parent and child have conflicting param names
-		strict: 		false 	// '/foo' and '/foo/' are treated the same
-	});
+
+	// '/foo' and '/foo/' are treated the same
+	strict: false, 	
+
+	// '/Foo' and '/foo' aret treated the same
+	caseSensitive: false,	
+
+	// Parent and child have conflicting param names
+	mergeParams: false
+		
+});
 
 
+// Provide the post model to other middleware routes
 router.param('id', function(req, res, next, id) {
 
 	// PostModel.findOne({ _id: id }, function(err, post) {
@@ -29,8 +37,11 @@ router.param('id', function(req, res, next, id) {
 			});
 });
 
+
 router.delete('/:id', function(req, res, next) {
+	
 	var post = req.post;
+	
 	post.remove(function(err, result) {
 		if(err) {
 			console.log('Error:', err);
