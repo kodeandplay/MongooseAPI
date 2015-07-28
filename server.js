@@ -1,13 +1,15 @@
-var logger 			= require('morgan'),
-	express 		= require('express'),
-	cluster 		= require('cluster'),
-	numCPUs 		= require('os').cpus().length,
-	mongoose 		= require('mongoose'),
-	bodyParser 		= require('body-parser'),
-	errorhandler	= require('errorhandler'),
-	postsRoute 		= require('./routes/posts'),
-	usersRouter 	= require('./routes/users'),
-	app 			= express();
+var 
+	logger       = require('morgan'),
+	express      = require('express'),
+	cluster      = require('cluster'),
+	numCPUs      = require('os').cpus().length,
+	mongoose     = require('mongoose'),
+	bodyParser   = require('body-parser'),
+	errorhandler = require('errorhandler'),
+	postsRoute   = require('./routes/posts'),
+	usersRouter  = require('./routes/users'),
+	app          = express();
+
 
 if(cluster.isMaster) {
 
